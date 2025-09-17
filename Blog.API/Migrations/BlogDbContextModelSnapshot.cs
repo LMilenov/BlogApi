@@ -30,7 +30,7 @@ namespace Blog.API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AuthorName")
+                    b.Property<string>("Author")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -49,6 +49,24 @@ namespace Blog.API.Migrations
                     b.HasIndex("PostId");
 
                     b.ToTable("Comments");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Author = "Lucy",
+                            Body = "Nice post!",
+                            CreatedAtUtc = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PostId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Author = "Darin",
+                            Body = "I love ASP.NET",
+                            CreatedAtUtc = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            PostId = 2
+                        });
                 });
 
             modelBuilder.Entity("Blog.API.Models.Post", b =>
@@ -78,6 +96,22 @@ namespace Blog.API.Migrations
                     b.HasIndex("CreatedAtUtc");
 
                     b.ToTable("Posts");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Content = "This is my first blog post!",
+                            CreatedAtUtc = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Hello world"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Content = "ASP.NET Core makes building APIs easy!",
+                            CreatedAtUtc = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Title = "Learning ASP>NET Core"
+                        });
                 });
 
             modelBuilder.Entity("Blog.API.Models.PostTag", b =>
@@ -93,6 +127,23 @@ namespace Blog.API.Migrations
                     b.HasIndex("TagId");
 
                     b.ToTable("PostTags");
+
+                    b.HasData(
+                        new
+                        {
+                            PostId = 1,
+                            TagId = 1
+                        },
+                        new
+                        {
+                            PostId = 2,
+                            TagId = 1
+                        },
+                        new
+                        {
+                            PostId = 2,
+                            TagId = 2
+                        });
                 });
 
             modelBuilder.Entity("Blog.API.Models.Tag", b =>
@@ -112,6 +163,23 @@ namespace Blog.API.Migrations
                     b.HasIndex("Name");
 
                     b.ToTable("Tags");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "C#"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "ASP.NET"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "PostgreSQL"
+                        });
                 });
 
             modelBuilder.Entity("Blog.API.Models.Comment", b =>
