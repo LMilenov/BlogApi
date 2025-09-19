@@ -17,7 +17,34 @@ public class PostsController : ControllerBase
         _context = context;
     }
 
-    //Get api/posts
+    // GET api/posts
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<PostReadDto>>> GetPosts()
+    {
+        var posts = await _context.Posts
+            .Include(p => p.PostTags).ThenInclude(pt => pt.Tag)
+            .Include(p => p.Comments)
+            .Select(p => new PostReadDto
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Content = p.Content,
+                CreatedAtUtc = p.CreatedAtUtc,
+                Tags = p.PostTags.Select(pt => pt.Tag!.Name).ToList(),
+                Comments = p.Comments.Select(c => new CommentReadDto
+                {
+                    Id = c.Id,
+                    Author = c.Author,
+                    Body = c.Body,
+                    CreatedAtUtc = c.CreatedAtUtc
+                }).ToList()
+            })
+            .ToListAsync();
+
+        return Ok(posts);
+    }
+
+    //Get api/posts/{id}
     [HttpGet("{id}")]
     public async Task<ActionResult<IEnumerable<PostReadDto>>> GetPosts(int id)
     {
@@ -51,6 +78,7 @@ public class PostsController : ControllerBase
         return Ok(posts);
     }
 
+    // POST api/posts
     [HttpPost]
     public async Task<ActionResult<PostReadDto>> CreatePost(PostCreateDto dto)
     {
@@ -97,5 +125,31 @@ public class PostsController : ControllerBase
         };
 
         return CreatedAtAction(nameof(GetPosts), new { id = post.Id }, result);
+    }
+
+    //Put api/posts/{id}
+    [HttpPut("id")]
+    public async Task<IActionResult> UpdatePost(int id, PostCreateDto dto)
+    {
+        var post = await _context.Posts.Include(p => p.PostTags).FirstOrDefaultAsync(p => p.Id == id);
+        if (post == null)
+        {
+            return NotFound();
+        }
+
+        post.Title = dto.Title;
+        post.Content = dto.Content;
+
+        _context.PostTags.RemoveRange(post.PostTags);
+        
+        if (dto.TagIds != null && dto.TagIds.Any())
+        {
+            foreach (var tagId in dto.TagIds)
+            {
+                _context.PostTags.Add(new PostTag { PostId = post.Id, TagId = tagId });
+            }
+        }
+        await _context.SaveChangesAsync();
+        return NoContent();
     }
 }
