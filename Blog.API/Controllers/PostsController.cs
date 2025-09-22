@@ -141,7 +141,7 @@ public class PostsController : ControllerBase
         post.Content = dto.Content;
 
         _context.PostTags.RemoveRange(post.PostTags);
-        
+
         if (dto.TagIds != null && dto.TagIds.Any())
         {
             foreach (var tagId in dto.TagIds)
@@ -149,6 +149,18 @@ public class PostsController : ControllerBase
                 _context.PostTags.Add(new PostTag { PostId = post.Id, TagId = tagId });
             }
         }
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+
+    //Delete api/posts/{id}
+    [HttpDelete]
+    public async Task<IActionResult> DeletePost(int id)
+    {
+        var post = await _context.Posts.FindAsync(id);
+        if (post == null) return NotFound();
+
+        _context.Posts.RemoveRange(post);
         await _context.SaveChangesAsync();
         return NoContent();
     }
