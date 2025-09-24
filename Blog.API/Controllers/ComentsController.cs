@@ -65,4 +65,41 @@ public class CommentsController : ControllerBase
 
         return CreatedAtAction(nameof(GetComments), new { postId }, result);
     }
+    // DELETE: api/posts/{postId}/comments/{id}
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteComment(int postId, int id)
+    {
+        var comment = await _context.Comments
+            .FirstOrDefaultAsync(c => c.Id == id && c.PostId == postId);
+
+        if (comment == null) return NotFound();
+
+        _context.Comments.Remove(comment);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    // (Optional) PUT: api/posts/{postId}/comments/{id}
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateComment(int postId, int id, CommentCreateDto dto)
+    {
+        var comment = await _context.Comments
+            .FirstOrDefaultAsync(c => c.Id == id && c.PostId == postId);
+
+        if (comment == null) return NotFound();
+
+        comment.Author = dto.Author;
+        comment.Body = dto.Body;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new CommentReadDto
+        {
+            Id = comment.Id,
+            Author = comment.Author,
+            Body = comment.Body,
+            CreatedAtUtc = comment.CreatedAtUtc
+        });
+    }
 }
